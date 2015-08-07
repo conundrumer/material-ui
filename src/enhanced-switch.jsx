@@ -33,6 +33,7 @@ let EnhancedSwitch = React.createClass({
       name: React.PropTypes.string,
       value: React.PropTypes.string,
       label: React.PropTypes.string,
+      onKeyboardFocus: React.PropTypes.func,
       onSwitch: React.PropTypes.func,
       required: React.PropTypes.bool,
       disabled: React.PropTypes.bool,
@@ -323,6 +324,20 @@ let EnhancedSwitch = React.createClass({
 
   isKeyboardFocused() {
     return this.state.isKeyboardFocused;
+  },
+
+  removeKeyboardFocus(e) {
+    if (this.state.isKeyboardFocused) {
+      this.setState({isKeyboardFocused: false});
+      this.props.onKeyboardFocus(e, false);
+    }
+  },
+
+  setKeyboardFocus(e) {
+    if (!this.state.isKeyboardFocused) {
+      this.setState({isKeyboardFocused: true});
+      this.props.onKeyboardFocus(e, true);
+    }
   },
 
   _handleChange(e) {
