@@ -218,6 +218,7 @@ const EnhancedButton = React.createClass({
     if (!disabled && !disableTouchRipple) {
       childrenFragments.touchRipple = (
         <TouchRipple
+          ref="touchRipple"
           centerRipple={centerRipple}
           color={touchRippleColor}
           opacity={touchRippleOpacity}>
