@@ -100,7 +100,7 @@ let RaisedButton = React.createClass({
         height: this.getThemeButton().height,
         transition: Transitions.easeOut(),
       },
-      container: {
+      button: {
         position: 'relative',
         height: '100%',
         width: '100%',
@@ -179,9 +179,9 @@ let RaisedButton = React.createClass({
           <EnhancedButton
             {...other}
             {...buttonEventHandlers}
-            ref="container"
+            ref="button"
             disabled={disabled}
-            style={this.mergeAndPrefix(styles.container)}
+            style={this.mergeAndPrefix(styles.button)}
             focusRippleColor={rippleColor}
             touchRippleColor={rippleColor}
             focusRippleOpacity={rippleOpacity}
@@ -212,12 +212,12 @@ let RaisedButton = React.createClass({
   },
 
   _handleMouseLeave(e) {
-    if (!this.refs.container.isKeyboardFocused()) this.setState({ zDepth: this.state.initialZDepth, hovered: false });
+    if (!this.refs.button.isKeyboardFocused()) this.setState({ zDepth: this.state.initialZDepth, hovered: false });
     if (this.props.onMouseLeave) this.props.onMouseLeave(e);
   },
 
   _handleMouseEnter(e) {
-    if (!this.refs.container.isKeyboardFocused() && !this.state.touch) {
+    if (!this.refs.button.isKeyboardFocused() && !this.state.touch) {
       this.setState({hovered: true});
     }
     if (this.props.onMouseEnter) this.props.onMouseEnter(e);

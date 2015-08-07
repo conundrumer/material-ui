@@ -93,6 +93,7 @@ let DayButton = React.createClass({
 
     return this.props.date ? (
       <EnhancedButton {...other}
+        ref="button"
         style={styles.root}
         hoverStyle={styles.hover}
         disabled={this.props.disabled}

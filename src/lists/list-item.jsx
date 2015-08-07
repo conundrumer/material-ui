@@ -336,6 +336,7 @@ const ListItem = React.createClass({
       <div>
         <EnhancedButton
           {...other}
+          ref="button"
           disabled={disabled}
           disableKeyboardFocus={disableKeyboardFocus || this.state.rightIconButtonKeyboardFocused}
           linkButton={true}
@@ -343,7 +344,6 @@ const ListItem = React.createClass({
           onMouseLeave={this._handleMouseLeave}
           onMouseEnter={this._handleMouseEnter}
           onTouchStart={this._handleTouchStart}
-          ref="enhancedButton"
           style={this.mergeAndPrefix(styles.root, style)}>
           <div style={this.mergeAndPrefix(styles.innerDiv, innerDivStyle)}>
             {contentChildren}
@@ -356,7 +356,7 @@ const ListItem = React.createClass({
   },
 
   applyFocusState(focusState) {
-    const button = this.refs.enhancedButton;
+    const button = this.refs.button;
     const buttonEl = React.findDOMNode(button);
 
     if (button) {

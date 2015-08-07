@@ -89,6 +89,7 @@ let YearButton = React.createClass({
 
     return (
       <EnhancedButton {...other}
+        ref="button"
         style={styles.root}
         disableFocusRipple={true}
         disableTouchRipple={true}

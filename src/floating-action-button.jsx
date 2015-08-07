@@ -97,7 +97,7 @@ let FloatingActionButton = React.createClass({
         transition: Transitions.easeOut(),
         display: 'inline-block',
       },
-      container: {
+      button: {
         transition: Transitions.easeOut(),
         position: 'relative',
         height: themeVariables.buttonSize,
@@ -113,7 +113,7 @@ let FloatingActionButton = React.createClass({
         //See: http://stackoverflow.com/questions/17298739/css-overflow-hidden-not-working-in-chrome-when-parent-has-border-radius-and-chil
         transform: 'translate3d(0, 0, 0)',
       },
-      containerWhenMini: {
+      buttonWhenMini: {
         height: themeVariables.miniSize,
         width: themeVariables.miniSize,
       },
@@ -186,11 +186,11 @@ let FloatingActionButton = React.createClass({
         <EnhancedButton
           {...other}
           {...buttonEventHandlers}
-          ref="container"
+          ref="button"
           disabled={disabled}
           style={this.mergeAndPrefix(
-            styles.container,
-            this.props.mini && styles.containerWhenMini
+            styles.button,
+            this.props.mini && styles.buttonWhenMini
           )}
           focusRippleColor={styles.icon.color}
           touchRippleColor={styles.icon.color}>
@@ -222,12 +222,12 @@ let FloatingActionButton = React.createClass({
   },
 
   _handleMouseLeave(e) {
-    if (!this.refs.container.isKeyboardFocused()) this.setState({ zDepth: this.state.initialZDepth, hovered: false });
+    if (!this.refs.button.isKeyboardFocused()) this.setState({ zDepth: this.state.initialZDepth, hovered: false });
     if (this.props.onMouseLeave) this.props.onMouseLeave(e);
   },
 
   _handleMouseEnter(e) {
-    if (!this.refs.container.isKeyboardFocused() && !this.state.touch) {
+    if (!this.refs.button.isKeyboardFocused() && !this.state.touch) {
       this.setState({hovered: true});
     }
     if (this.props.onMouseEnter) this.props.onMouseEnter(e);

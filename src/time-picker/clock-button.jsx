@@ -83,6 +83,7 @@ let ClockButton = React.createClass({
 
     return (
         <EnhancedButton {...other}
+          ref="button"
           style={this.mergeAndPrefix(styles.root)}
           disableFocusRipple={true}
           disableTouchRipple={true}
