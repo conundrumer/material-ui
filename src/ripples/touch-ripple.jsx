@@ -70,7 +70,7 @@ const TouchRipple = React.createClass({
     ripples = ImmutabilityHelper.push(ripples, (
       <CircleRipple
         key={this.state.nextKey}
-        style={!this.props.centerRipple ? this._getRippleStyle(e) : {}}
+        style={!this.props.centerRipple && e ? this._getRippleStyle(e) : {}}
         color={this.props.color}
         opacity={this.props.opacity}
         touchGenerated={isRippleTouchGenerated} />
