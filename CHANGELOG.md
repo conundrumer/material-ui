@@ -1,3 +1,9 @@
+## 0.10.4
+###### _Aug 8, 2015_
+
+##### Component Fixes / Enhancements
+- TouchRipple - Fixed a bug that caused onClick to not fire on the first click (#1370)
+
 ## 0.10.3
 ###### _Aug 8, 2015_
 
@@ -30,6 +36,11 @@
 
 ## 0.10.2
 ###### _Jul 29, 2015_
+
+##### Breaking Changes (Missed in the original release notes.)
+- Changed `date-picker/index.js` to expose DatePicker and DatePickerDialog.
+  Hence `require('material-ui/lib/date-picker')` no longer works. Use
+  `require('material-ui/lib/date-picker/date-picker')` instead.
 
 ##### General
 - Replaced onMouseOver / onMouseOut with onMouseEnter / onMouseLeave to achieve hover affects.
