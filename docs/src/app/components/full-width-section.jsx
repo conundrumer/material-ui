@@ -1,5 +1,5 @@
-let React = require('react');
-let { ClearFix, Mixins, Styles } = require('material-ui');
+import React from 'react';
+import { ClearFix, Mixins, Styles } from 'material-ui';
 let { StylePropable, StyleResizable } = Mixins;
 let DesktopGutter = Styles.Spacing.desktopGutter;
 
@@ -11,13 +11,13 @@ let FullWidthSection = React.createClass({
   propTypes: {
     useContent: React.PropTypes.bool,
     contentType: React.PropTypes.string,
-    contentStyle: React.PropTypes.object
+    contentStyle: React.PropTypes.object,
   },
 
   getDefaultProps() {
     return {
       useContent: false,
-      contentType: 'div'
+      contentType: 'div',
     };
   },
 
@@ -25,20 +25,20 @@ let FullWidthSection = React.createClass({
     return  {
       root: {
         padding: DesktopGutter + 'px',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
       },
       content: {
           maxWidth: '1200px',
-          margin: '0 auto'
+          margin: '0 auto',
       },
       rootWhenSmall: {
           paddingTop: (DesktopGutter * 2) + 'px',
-          paddingBottom: (DesktopGutter * 2) + 'px'
+          paddingBottom: (DesktopGutter * 2) + 'px',
       },
       rootWhenLarge: {
           paddingTop: (DesktopGutter * 3) + 'px',
-          paddingBottom: (DesktopGutter * 3) + 'px'
-      }
+          paddingBottom: (DesktopGutter * 3) + 'px',
+      },
     };
   },
 
@@ -48,7 +48,7 @@ let FullWidthSection = React.createClass({
       useContent,
       contentType,
       contentStyle,
-      ...other
+      ...other,
     } = this.props;
 
     let styles = this.getStyles();
@@ -75,7 +75,7 @@ let FullWidthSection = React.createClass({
         {content}
       </ClearFix>
     );
-  }
+  },
 });
 
 module.exports = FullWidthSection;

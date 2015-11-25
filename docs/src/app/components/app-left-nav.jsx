@@ -1,28 +1,33 @@
-let React = require('react');
-let Router = require('react-router');
-let { MenuItem, LeftNav, Styles } = require('material-ui');
-let { Colors, Spacing, Typography } = Styles;
+import React from 'react';
+import Router from 'react-router';
+import { MenuItem, LeftNav, Mixins, Styles } from 'material-ui';
+const { Colors, Spacing, Typography } = Styles;
+const { StylePropable } = Mixins;
 
-let menuItems = [
+const menuItems = [
     { route: 'get-started', text: 'Get Started' },
     { route: 'customization', text: 'Customization' },
     { route: 'components', text: 'Components' },
     { type: MenuItem.Types.SUBHEADER, text: 'Resources' },
     { type: MenuItem.Types.LINK, payload: 'https://github.com/callemall/material-ui', text: 'GitHub' },
     { type: MenuItem.Types.LINK, payload: 'http://facebook.github.io/react', text: 'React' },
-    { type: MenuItem.Types.LINK, payload: 'https://www.google.com/design/spec/material-design/introduction.html', text: 'Material Design' }
+    { type: MenuItem.Types.LINK, payload: 'https://www.google.com/design/spec/material-design/introduction.html', text: 'Material Design' },
   ];
 
 
-class AppLeftNav extends React.Component {
+const AppLeftNav = React.createClass({
+  mixins: [StylePropable],
 
-  constructor() {
-    super();
-    this.toggle = this.toggle.bind(this);
-    this._getSelectedIndex = this._getSelectedIndex.bind(this);
-    this._onLeftNavChange = this._onLeftNavChange.bind(this);
-    this._onHeaderClick = this._onHeaderClick.bind(this);
-  }
+  contextTypes: {
+    muiTheme: React.PropTypes.object,
+    router: React.PropTypes.func,
+  },
+  
+  getInitialState () {
+    return {
+      leftNavOpen: false,
+    };
+  },
 
   getStyles() {
     return {
@@ -35,13 +40,13 @@ class AppLeftNav extends React.Component {
       backgroundColor: Colors.cyan500,
       paddingLeft: Spacing.desktopGutter,
       paddingTop: '0px',
-      marginBottom: '8px'
+      marginBottom: '8px',
     };
-  }
+  },
 
   render() {
     let header = (
-      <div style={this.getStyles()} onTouchTap={this._onHeaderClick}>
+      <div style={this.prepareStyles(this.getStyles())} onTouchTap={this._onHeaderClick}>
         material ui
       </div>
     );
@@ -50,40 +55,41 @@ class AppLeftNav extends React.Component {
       <LeftNav
         ref="leftNav"
         docked={false}
-        isInitiallyOpen={false}
+        open={this.state.leftNavOpen}
+        onChangeRequest={this._onLeftNavChangeRequest}
         header={header}
         menuItems={menuItems}
         selectedIndex={this._getSelectedIndex()}
         onChange={this._onLeftNavChange} />
     );
-  }
+  },
 
   toggle() {
-    this.refs.leftNav.toggle();
-  }
+    this.setState({leftNavOpen: !this.state.leftNavOpen});
+  },
 
   _getSelectedIndex() {
     let currentItem;
 
     for (let i = menuItems.length - 1; i >= 0; i--) {
       currentItem = menuItems[i];
-      if (currentItem.route && this.context.router.isActive(currentItem.route)) return i;
+      if (currentItem.route && this.props.history.isActive(currentItem.route)) return i;
     }
-  }
+  },
+
+  _onLeftNavChangeRequest(open) {
+    this.setState({leftNavOpen: open});
+  },
 
   _onLeftNavChange(e, key, payload) {
-    this.context.router.transitionTo(payload.route);
-  }
+    this.props.history.pushState(null, payload.route);
+  },
 
   _onHeaderClick() {
-    this.context.router.transitionTo('root');
-    this.refs.leftNav.close();
-  }
+    this.props.history.pushState(null, '/');
+    this.setState({leftNavOpen: false});
+  },
 
-}
-
-AppLeftNav.contextTypes = {
-  router: React.PropTypes.func
-};
+});
 
 module.exports = AppLeftNav;

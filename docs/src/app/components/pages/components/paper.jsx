@@ -1,13 +1,13 @@
-let React = require('react');
-let { ClearFix, Mixins, Paper } = require('material-ui');
-let ComponentDoc = require('../../component-doc');
+import React from 'react';
+import { ClearFix, Mixins, Paper } from 'material-ui';
+import ComponentDoc from '../../component-doc';
 
-let { StyleResizable } = Mixins;
-let Code = require('paper-code');
-let CodeExample = require('../../code-example/code-example');
+const { StyleResizable } = Mixins;
+import Code from 'paper-code';
+import CodeExample from '../../code-example/code-example';
+import CodeBlock from '../../code-example/code-block';
 
-
-let PaperPage = React.createClass ({
+const PaperPage = React.createClass ({
 
   mixins: [StyleResizable],
 
@@ -18,16 +18,16 @@ let PaperPage = React.createClass ({
         width: '100px',
         margin: '0 auto',
         marginBottom: '64px',
-        textAlign: 'center'
+        textAlign: 'center',
       },
       group: {
         float: 'left',
-        width: '100%'
+        width: '100%',
       },
       p: {
         lineHeight: '80px',
-        height: '100%'
-      }
+        height: '100%',
+      },
     };
 
     if (this.isDeviceSize(StyleResizable.statics.Sizes.MEDIUM)) {
@@ -47,35 +47,35 @@ let PaperPage = React.createClass ({
             name: 'circle',
             type: 'bool',
             header: 'default: false',
-            desc: 'Set to true to generate a circlular paper container.'
+            desc: 'Set to true to generate a circlular paper container.',
           },
           {
             name: 'rounded',
             type: 'bool',
             header: 'default: true',
             desc: 'By default, the paper container will have a border radius. ' +
-              'Set this to false to generate a container with sharp corners.'
+              'Set this to false to generate a container with sharp corners.',
           },
           {
             name: 'style',
             type: 'object',
             header: 'optional',
-            desc: 'Override the inline-styles of Paper\'s root element.'
+            desc: 'Override the inline-styles of Paper\'s root element.',
           },
           {
             name: 'zDepth',
-            type: 'number (0-5)',
+            type: 'oneOf [0,1,2,3,4,5]',
             header: 'default: 1',
-            desc: 'This number represents the zDepth of the paper shadow.'
+            desc: 'This number represents the zDepth of the paper shadow.',
           },
           {
             name: 'transitionEnabled',
             type: 'bool',
             header: 'default: true',
-            desc: 'Set to false to disable CSS transitions for the paper element.'
-          }
-        ]
-      }
+            desc: 'Set to false to disable CSS transitions for the paper element.',
+          },
+        ],
+      },
     ];
 
     let groupStyle = this.getStyles().group;
@@ -84,6 +84,19 @@ let PaperPage = React.createClass ({
       <ComponentDoc
         name="Paper"
         componentInfo={componentInfo}>
+
+        <Paper style = {{marginBottom: '22px'}}>
+          <CodeBlock>
+          {
+            `//Import statement:
+import Paper from 'material-ui/lib/paper';
+
+//See material-ui/lib/index.js for more
+            `
+          }
+          </CodeBlock>
+        </Paper>
+
         <CodeExample code={Code}>
           <div>
             <ClearFix style={groupStyle}>
@@ -138,7 +151,7 @@ let PaperPage = React.createClass ({
       elements.push(React.cloneElement(this._createPaperElement(i, "circle=true"), {circle: true}));
     }
     return elements;
-  }
+  },
 
 });
 

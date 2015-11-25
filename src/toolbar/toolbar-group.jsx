@@ -1,9 +1,10 @@
-let React = require('react');
-let Colors = require('../styles/colors');
-let StylePropable = require('../mixins/style-propable');
+const React = require('react');
+const Colors = require('../styles/colors');
+const StylePropable = require('../mixins/style-propable');
+const DefaultRawTheme = require('../styles/raw-themes/light-raw-theme');
+const ThemeManager = require('../styles/theme-manager');
 
-
-let ToolbarGroup = React.createClass({
+const ToolbarGroup = React.createClass({
 
   mixins: [StylePropable],
 
@@ -14,6 +15,20 @@ let ToolbarGroup = React.createClass({
   propTypes: {
     className: React.PropTypes.string,
     float: React.PropTypes.string,
+    style: React.PropTypes.object,
+    lastChild: React.PropTypes.bool,
+    firstChild: React.PropTypes.bool,
+  },
+
+  //for passing default theme context to children
+  childContextTypes: {
+    muiTheme: React.PropTypes.object,
+  },
+
+  getChildContext () {
+    return {
+      muiTheme: this.state.muiTheme,
+    };
   },
 
   getDefaultProps() {
@@ -22,17 +37,30 @@ let ToolbarGroup = React.createClass({
     };
   },
 
+  getInitialState () {
+    return {
+      muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme),
+    };
+  },
+
+  //to update theme inside state whenever a new theme is passed down
+  //from the parent / owner using context
+  componentWillReceiveProps (nextProps, nextContext) {
+    let newMuiTheme = nextContext.muiTheme ? nextContext.muiTheme : this.state.muiTheme;
+    this.setState({muiTheme: newMuiTheme});
+  },
+
   getTheme() {
-    return this.context.muiTheme.component.toolbar;
+    return this.state.muiTheme.toolbar;
   },
 
   getSpacing() {
-    return this.context.muiTheme.spacing.desktopGutter;
+    return this.state.muiTheme.rawTheme.spacing.desktopGutter;
   },
 
   getStyles() {
     let marginHorizontal = this.getSpacing();
-    let marginVertical = (this.getTheme().height - this.context.muiTheme.component.button.height) / 2;
+    let marginVertical = (this.getTheme().height - this.state.muiTheme.button.height) / 2;
     let styles = {
       root: {
         position: 'relative',
@@ -41,7 +69,7 @@ let ToolbarGroup = React.createClass({
       dropDownMenu: {
         root: {
           float: 'left',
-          color: Colors.lightBlack,// removes hover color change, we want to keep it
+          color: Colors.lightBlack, // removes hover color change, we want to keep it
           display: 'inline-block',
           marginRight: this.getSpacing(),
         },
@@ -90,6 +118,9 @@ let ToolbarGroup = React.createClass({
       if (!currentChild) {
         return null;
       }
+      if (!currentChild.type) {
+        return currentChild;
+      }
       switch (currentChild.type.displayName) {
         case 'DropDownMenu' :
           return React.cloneElement(currentChild, {
@@ -124,7 +155,7 @@ let ToolbarGroup = React.createClass({
     }, this);
 
     return (
-      <div className={this.props.className} style={this.mergeAndPrefix(styles.root, this.props.style)}>
+      <div className={this.props.className} style={this.prepareStyles(styles.root, this.props.style)}>
         {newChildren}
       </div>
     );

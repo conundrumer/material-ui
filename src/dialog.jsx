@@ -1,30 +1,58 @@
-let React = require('react/addons');
-let WindowListenable = require('./mixins/window-listenable');
-let CssEvent = require('./utils/css-event');
-let KeyCode = require('./utils/key-code');
-let Transitions = require('./styles/transitions');
-let StylePropable = require('./mixins/style-propable');
-let FlatButton = require('./flat-button');
-let Overlay = require('./overlay');
-let Paper = require('./paper');
+const React = require('react');
+const ReactDOM = require('react-dom');
+const WindowListenable = require('./mixins/window-listenable');
+const CssEvent = require('./utils/css-event');
+const KeyCode = require('./utils/key-code');
+const Transitions = require('./styles/transitions');
+const StylePropable = require('./mixins/style-propable');
+const FlatButton = require('./flat-button');
+const Overlay = require('./overlay');
+const RenderToLayer = require('./render-to-layer');
+const Paper = require('./paper');
+const DefaultRawTheme = require('./styles/raw-themes/light-raw-theme');
+const ThemeManager = require('./styles/theme-manager');
+const warning = require('warning');
 
-let ReactTransitionGroup = React.addons.TransitionGroup;
+const ReactTransitionGroup = require('react-addons-transition-group');
 
-let TransitionItem = React.createClass({
+const TransitionItem = React.createClass({
   mixins: [StylePropable],
 
   contextTypes: {
     muiTheme: React.PropTypes.object,
   },
 
-  getInitialState() {
+  //for passing default theme context to children
+  childContextTypes: {
+    muiTheme: React.PropTypes.object,
+  },
+
+  getChildContext () {
     return {
-      style: {},
+      muiTheme: this.state.muiTheme,
     };
   },
 
+  getInitialState() {
+    return {
+      style: {},
+      muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme),
+    };
+  },
+
+  //to update theme inside state whenever a new theme is passed down
+  //from the parent / owner using context
+  componentWillReceiveProps (nextProps, nextContext) {
+    let newMuiTheme = nextContext.muiTheme ? nextContext.muiTheme : this.state.muiTheme;
+    this.setState({muiTheme: newMuiTheme});
+  },
+
   componentWillEnter(callback) {
-    let spacing = this.context.muiTheme.spacing;
+    this.componentWillAppear(callback);
+  },
+
+  componentWillAppear(callback) {
+    let spacing = this.state.muiTheme.rawTheme.spacing;
 
     this.setState({
       style: {
@@ -46,7 +74,7 @@ let TransitionItem = React.createClass({
 
     setTimeout(() => {
       if (this.isMounted()) callback();
-    }.bind(this), 450); // matches transition duration
+    }, 450); // matches transition duration
   },
 
   render() {
@@ -55,18 +83,29 @@ let TransitionItem = React.createClass({
       ...other,
     } = this.props;
 
-    return <div {...other} style={this.mergeAndPrefix(this.state.style, style)}>
+    return <div {...other} style={this.prepareStyles(this.state.style, style)}>
         {this.props.children}
       </div>;
   },
 });
 
-let Dialog = React.createClass({
+const DialogInline = React.createClass({
 
   mixins: [WindowListenable, StylePropable],
 
   contextTypes: {
     muiTheme: React.PropTypes.object,
+  },
+
+  //for passing default theme context to children
+  childContextTypes: {
+    muiTheme: React.PropTypes.object,
+  },
+
+  getChildContext () {
+    return {
+      muiTheme: this.state.muiTheme,
+    };
   },
 
   propTypes: {
@@ -76,18 +115,21 @@ let Dialog = React.createClass({
     bodyStyle: React.PropTypes.object,
     contentClassName: React.PropTypes.string,
     contentStyle: React.PropTypes.object,
-    modal: React.PropTypes.bool,
-    openImmediately: React.PropTypes.bool,
-    onClickAway: React.PropTypes.func,
-    onDismiss: React.PropTypes.func,
-    onShow: React.PropTypes.func,
+    open: React.PropTypes.bool.isRequired,
     repositionOnUpdate: React.PropTypes.bool,
+    style: React.PropTypes.object,
     title: React.PropTypes.node,
   },
 
   windowListeners: {
     keyup: '_handleWindowKeyUp',
-    resize: '_positionDialog',
+    resize: '_handleResize',
+  },
+
+  getInitialState() {
+    return {
+      muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme),
+    };
   },
 
   getDefaultProps() {
@@ -95,23 +137,13 @@ let Dialog = React.createClass({
       autoDetectWindowHeight: false,
       autoScrollBodyContent: false,
       actions: [],
-      modal: false,
       repositionOnUpdate: true,
-    };
-  },
-
-  getInitialState() {
-    return {
-      open: this.props.openImmediately || false,
+      open: null,
     };
   },
 
   componentDidMount() {
     this._positionDialog();
-    if (this.props.openImmediately) {
-      this.refs.dialogOverlay.preventScrolling();
-      this._onShow();
-    }
   },
 
   componentDidUpdate() {
@@ -119,7 +151,7 @@ let Dialog = React.createClass({
   },
 
   getStyles() {
-    let spacing = this.context.muiTheme.spacing;
+    let spacing = this.state.muiTheme.rawTheme.spacing;
 
     let main = {
       position: 'fixed',
@@ -154,25 +186,25 @@ let Dialog = React.createClass({
     let title = {
         margin: 0,
         padding: gutter + gutter + '0 ' + gutter,
-        color: this.context.muiTheme.palette.textColor,
+        color: this.state.muiTheme.rawTheme.palette.textColor,
         fontSize: 24,
         lineHeight: '32px',
         fontWeight: '400',
     };
 
 
-    if (this.state.open) {
-      main = this.mergeAndPrefix(main, {
+    if (this.props.open) {
+      main = this.mergeStyles(main, {
         left: 0,
         transition: Transitions.easeOut('0ms', 'left', '0ms'),
       });
     }
 
     return {
-      main: this.mergeAndPrefix(main, this.props.style),
-      content: this.mergeAndPrefix(content, this.props.contentStyle),
+      main: this.mergeStyles(main, this.props.style),
+      content: this.mergeStyles(content, this.props.contentStyle),
       paper: {
-        background: this.context.muiTheme.canvasColor,
+        background: this.state.muiTheme.rawTheme.palette.canvasColor,
       },
       body: this.mergeStyles(body, this.props.bodyStyle),
       title: this.mergeStyles(title, this.props.titleStyle),
@@ -187,14 +219,16 @@ let Dialog = React.createClass({
       // If the title is a string, wrap in an h3 tag.
       // If not, just use it as a node.
       title = Object.prototype.toString.call(this.props.title) === '[object String]' ?
-        <h3 style={styles.title}>{this.props.title}</h3> :
+        <h3 style={this.prepareStyles(styles.title)}>{this.props.title}</h3> :
         this.props.title;
     }
 
     return (
-      <div ref="container" style={styles.main}>
-        <ReactTransitionGroup component="div" ref="dialogWindow">
-          {this.state.open &&
+      <div ref="container" style={this.prepareStyles(styles.main)}>
+        <ReactTransitionGroup component="div" ref="dialogWindow" 
+          transitionAppear={true} transitionAppearTimeout={450}
+          transitionEnter={true} transitionEnterTimeout={450}>
+          {this.props.open &&
             <TransitionItem
               className={this.props.contentClassName}
               style={styles.content}>
@@ -202,44 +236,21 @@ let Dialog = React.createClass({
                 style={styles.paper}
                 zDepth={4}>
                 {title}
-
-                <div ref="dialogContent" style={styles.body}>
+                <div ref="dialogContent" style={this.prepareStyles(styles.body)}>
                   {this.props.children}
                 </div>
-
                 {actions}
             </Paper>
           </TransitionItem>}
         </ReactTransitionGroup>
         <Overlay
-          ref="dialogOverlay"
-          show={this.state.open}
-          autoLockScrolling={false}
+          show={this.props.open}
           onTouchTap={this._handleOverlayTouchTap} />
       </div>
     );
   },
 
-  isOpen() {
-    return this.state.open;
-  },
-
-  dismiss() {
-    CssEvent.onTransitionEnd(this.getDOMNode(), () => {
-      this.refs.dialogOverlay.allowScrolling();
-    }.bind(this));
-
-    this.setState({ open: false });
-    this._onDismiss();
-  },
-
-  show() {
-    this.refs.dialogOverlay.preventScrolling();
-    this.setState({ open: true }, this._onShow);
-  },
-
   _getAction(actionJSON, key) {
-    let styles = {marginRight: 8};
     let props = {
       key: key,
       secondary: true,
@@ -249,27 +260,32 @@ let Dialog = React.createClass({
           actionJSON.onTouchTap.call(undefined);
         }
         if (!(actionJSON.onClick || actionJSON.onTouchTap)) {
-          this.dismiss();
+          this._requestClose(true);
         }
       },
       label: actionJSON.text,
-      style: styles,
+      style: {
+        marginRight: 8,
+      },
     };
+
     if (actionJSON.ref) {
       props.ref = actionJSON.ref;
       props.keyboardFocused = actionJSON.ref === this.props.actionFocus;
     }
+    if (actionJSON.id) {
+      props.id = actionJSON.id;
+    }
 
     return (
-      <FlatButton
-        {...props} />
+      <FlatButton {...props} />
     );
   },
 
   _getActionsContainer(actions) {
     let actionContainer;
     let actionObjects = [];
-    let actionStyle = {
+    const actionStyle = {
       boxSizing: 'border-box',
       WebkitTapHighlightColor: 'rgba(0,0,0,0)',
       padding: 8,
@@ -291,7 +307,7 @@ let Dialog = React.createClass({
       }
 
       actionContainer = (
-        <div style={actionStyle}>
+        <div style={this.prepareStyles(actionStyle)}>
           {actionObjects}
         </div>
       );
@@ -301,62 +317,208 @@ let Dialog = React.createClass({
   },
 
   _positionDialog() {
-    if (this.state.open) {
-      let clientHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
-      let container = this.getDOMNode();
-      let dialogWindow = this.refs.dialogWindow.getDOMNode();
-      let dialogContent = this.refs.dialogContent.getDOMNode();
-      let minPaddingTop = 16;
+    if (!this.props.open) {
+      return;
+    }
 
-      //Reset the height in case the window was resized.
-      dialogWindow.style.height = '';
-      dialogContent.style.height = '';
+    let clientHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+    let container = ReactDOM.findDOMNode(this);
+    let dialogWindow = ReactDOM.findDOMNode(this.refs.dialogWindow);
+    let dialogContent = ReactDOM.findDOMNode(this.refs.dialogContent);
+    let minPaddingTop = 16;
 
-      let dialogWindowHeight = dialogWindow.offsetHeight;
-      let paddingTop = ((clientHeight - dialogWindowHeight) / 2) - 64;
-      if (paddingTop < minPaddingTop) paddingTop = minPaddingTop;
+    //Reset the height in case the window was resized.
+    dialogWindow.style.height = '';
+    dialogContent.style.height = '';
 
-      //Vertically center the dialog window, but make sure it doesn't
-      //transition to that position.
-      if (this.props.repositionOnUpdate || !container.style.paddingTop) {
-        container.style.paddingTop = paddingTop + 'px';
-      }
+    let dialogWindowHeight = dialogWindow.offsetHeight;
+    let paddingTop = ((clientHeight - dialogWindowHeight) / 2) - 64;
+    if (paddingTop < minPaddingTop) paddingTop = minPaddingTop;
 
-      // Force a height if the dialog is taller than clientHeight
-      if (this.props.autoDetectWindowHeight || this.props.autoScrollBodyContent) {
-        let styles = this.getStyles();
-        let maxDialogContentHeight = clientHeight - 2 * (styles.body.padding + 64);
+    //Vertically center the dialog window, but make sure it doesn't
+    //transition to that position.
+    if (this.props.repositionOnUpdate || !container.style.paddingTop) {
+      container.style.paddingTop = paddingTop + 'px';
+    }
 
-        if (this.props.title) maxDialogContentHeight -= dialogContent.previousSibling.offsetHeight;
-        if (this.props.actions) maxDialogContentHeight -= dialogContent.nextSibling.offsetHeight;
+    // Force a height if the dialog is taller than clientHeight
+    if (this.props.autoDetectWindowHeight || this.props.autoScrollBodyContent) {
+      let styles = this.getStyles();
+      let maxDialogContentHeight = clientHeight - 2 * (styles.body.padding + 64);
 
-        dialogContent.style.maxHeight = maxDialogContentHeight + 'px';
+      if (this.props.title) maxDialogContentHeight -= dialogContent.previousSibling.offsetHeight;
+      if (this.props.actions.length) maxDialogContentHeight -= dialogContent.nextSibling.offsetHeight;
+
+      dialogContent.style.maxHeight = maxDialogContentHeight + 'px';
+    }
+  },
+
+  _requestClose(buttonClicked) {
+    
+    if (!buttonClicked && this.props.modal) {
+      return;
+    }
+
+    if (this.props.onRequestClose) {
+      this.props.onRequestClose(!!buttonClicked);
+    }
+  },
+
+  _handleOverlayTouchTap() {
+    this._requestClose(false);
+  },
+
+  _handleWindowKeyUp(event) {
+    if (event.keyCode === KeyCode.ESC) {
+      this._requestClose(false);
+    }
+  },
+
+  _handleResize() {
+    if (this.props.open) {
+      this._positionDialog();
+    }
+  },
+
+});
+
+
+const wrapperStyle = {position:'fixed', top:0, left:0, zIndex:20};
+const Dialog = React.createClass({
+
+  propTypes: {
+    actionFocus: React.PropTypes.string, 
+    actions: React.PropTypes.array,
+    autoDetectWindowHeight: React.PropTypes.bool,
+    autoScrollBodyContent: React.PropTypes.bool,
+    bodyStyle: React.PropTypes.object,
+    contentClassName: React.PropTypes.string,
+    contentStyle: React.PropTypes.object,
+    defaultOpen: React.PropTypes.bool,
+    modal: React.PropTypes.bool,
+    onDismiss: React.PropTypes.func,
+    onRequestClose: React.PropTypes.func,
+    onShow: React.PropTypes.func,
+    open: React.PropTypes.bool,
+    openImmediately: React.PropTypes.bool,
+    repositionOnUpdate: React.PropTypes.bool,
+    style: React.PropTypes.object,
+    title: React.PropTypes.node,
+    titleStyle: React.PropTypes.object,
+  },
+
+  getInitialState() {
+    if (process.env.NODE_ENV !== 'production') {
+      this._testDeprecations();
+    }
+
+    let open = this.props.open;
+
+    if (open === null) {
+      open = (this.props.openImmediately || this.props.defaultOpen);
+    }
+
+    return {
+      open: open,
+      muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme),
+    };
+  },
+
+  getDefaultProps() {
+    return {
+      open:null,
+      defaultOpen:false,
+      modal:false,
+    }
+  },
+
+  //to update theme inside state whenever a new theme is passed down
+  //from the parent / owner using context
+  componentWillReceiveProps (nextProps, nextContext) {
+    const newMuiTheme = nextContext.muiTheme ? nextContext.muiTheme : this.state.muiTheme;
+    this.setState({muiTheme: newMuiTheme});
+
+    if (process.env.NODE_ENV !== 'production') {
+      this._testDeprecations();
+    }
+    if (nextProps.open !== this.props.open) {
+      if (nextProps.open && !this.state.open) {
+        this._show();
+      } else if (!nextProps.open && this.state.open) {
+        this._dismiss();
       }
     }
+  },
+
+  render() {
+    return (
+      <RenderToLayer render={this.renderLayer} open={this.state.open} />
+    );
+  },
+
+  renderLayer() {
+    return (
+      <div style={wrapperStyle}>
+        <DialogInline {...this.props} onRequestClose={this.props.onRequestClose} open={this.state.open} />
+      </div>
+    );
+  },
+
+  _testDeprecations() {
+    warning(!this.props.hasOwnProperty('openImmediately'),
+      'openImmediately has been deprecated in favor of defaultOpen');
+
+    warning(!(typeof this.props.onShow === 'function'),
+      'onShow will be removed in favor of explicitly setting open');
+
+    warning(!(typeof this.props.onDismiss === 'function'),
+      'onDismiss will be removed in favor of explicitly setting open and can be replaced by onRequestClose');
+
+  },
+
+
+  show() {
+    warning(false, 'show has been deprecated in favor of explicitly setting the open property.');
+
+    this._show();
   },
 
   _onShow() {
-    if (this.props.onShow) this.props.onShow();
+    if (this.props.onShow) {
+      this.props.onShow();
+    }
+  },
+
+  _show() {
+    this.setState({
+      open: true,
+    }, this._onShow);
+  },
+
+  dismiss() {
+    warning(false, 'dismiss has been deprecated in favor of explicitly setting the open property.');
+
+    this._dismiss();
   },
 
   _onDismiss() {
+    if (this.props.onDismiss) {
+      this.props.onDismiss();
+    }
+  },
+
+  _dismiss() {
+    this.setState({
+      open: false,
+    }, this._onDismiss);
+  },
+
+  layerWillUnmount() {
     if (this.props.onDismiss) this.props.onDismiss();
   },
 
-  _handleOverlayTouchTap(e) {
-    if (this.props.modal) {
-      e.stopPropagation();
-    }
-    else {
-      this.dismiss();
-      if (this.props.onClickAway) this.props.onClickAway();
-    }
-  },
-
-  _handleWindowKeyUp(e) {
-    if (e.keyCode === KeyCode.ESC && !this.props.modal) {
-      this.dismiss();
-    }
+  isOpen() {
+    return this.state.openImmediately;
   },
 
 });

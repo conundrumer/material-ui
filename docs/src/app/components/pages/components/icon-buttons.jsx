@@ -1,13 +1,13 @@
-let React = require('react');
-let { FontIcon, IconButton, NavigationMenu } = require('material-ui');
-let ComponentDoc = require('../../component-doc');
-let ActionGrade = require('svg-icons/action/grade');
-let ActionHome = require('svg-icons/action/home');
-let Code = require('icon-buttons-code');
-let CodeExample = require('../../code-example/code-example');
+import React from 'react';
+import { FontIcon, IconButton, NavigationMenu, Paper } from 'material-ui';
+import ComponentDoc from '../../component-doc';
+import ActionGrade from 'svg-icons/action/grade';
+import ActionHome from 'svg-icons/action/home';
+import Code from 'icon-buttons-code';
+import CodeExample from '../../code-example/code-example';
+import CodeBlock from '../../code-example/code-block';
 
-
-class IconButtonsPage extends React.Component {
+export default class IconButtonsPage extends React.Component {
 
   render() {
 
@@ -53,45 +53,45 @@ class IconButtonsPage extends React.Component {
             type: 'string',
             header: 'optional',
             desc: 'If you are using a stylesheet for your icons, enter the ' +
-                  'class name for the icon to be used here.'
+                  'class name for the icon to be used here.',
           },
           {
             name: 'iconStyle',
             type: 'object',
             header: 'optional',
-            desc: 'Overrides the inline-styles of the icon element.'
+            desc: 'Overrides the inline-styles of the icon element.',
           },
           {
             name: 'style',
             type: 'object',
             header: 'optional',
-            desc: 'Override the inline-styles of the button\'s root element.'
+            desc: 'Override the inline-styles of the button\'s root element.',
           },
           {
             name: 'tooltip',
             type: 'string',
             header: 'optional',
-            desc: 'The tooltip text to show.'
+            desc: 'The tooltip text to show.',
           },
           {
             name: 'tooltipPosition',
             type: 'string',
             header: 'default: bottom-center',
-            desc: 'Allows the tooltip to be viewed with different alignments: "bottom-center", "top-center", "bottom-right", "top-right", "bottom-left" and "top-left"'
+            desc: 'Allows the tooltip to be viewed with different alignments: "bottom-center", "top-center", "bottom-right", "top-right", "bottom-left" and "top-left"',
           },
           {
             name: 'tooltipStyles',
             type: 'object',
             header: 'optional',
-            desc: 'Allows modification of tooltip styles.'
+            desc: 'Allows modification of tooltip styles.',
           },
           {
             name: 'touch',
             type: 'bool',
             header: 'default: false',
-            desc: 'If true, this component will render the touch sized tooltip.'
-          }
-        ]
+            desc: 'If true, this component will render the touch sized tooltip.',
+          },
+        ],
       },
       {
         name: 'Events',
@@ -99,15 +99,20 @@ class IconButtonsPage extends React.Component {
           {
             name: 'onBlur',
             header: 'IconButton.onBlur(e)',
-            desc: 'Callback function for when the component loses focus.'
+            desc: 'Callback function for when the component loses focus.',
           },
           {
             name: 'onFocus',
             header: 'IconButton.onFocus(e)',
-            desc: 'Callback function for when the component gains focus.'
-          }
-        ]
-      }
+            desc: 'Callback function for when the component gains focus.',
+          },
+          {
+            name: 'onTouchTap',
+            header: 'IconButton.onTouchTap(e)',
+            desc: 'Callback function for when a touch tap / click event occurs on the button.',
+          },
+        ],
+      },
     ];
 
     return (
@@ -115,6 +120,16 @@ class IconButtonsPage extends React.Component {
         name="Icon Buttons"
         desc={desc}
         componentInfo={componentInfo}>
+
+        <Paper style = {{marginBottom: '22px'}}>
+          <CodeBlock>
+          {
+            '//Import statement:\nimport IconButton from \'material-ui/lib/icon-button\';\n\n' +
+            '//See material-ui/lib/index.js for more\n'
+          }
+          </CodeBlock>
+        </Paper>
+
         <CodeExample code={Code}>
           <IconButton iconClassName="muidocs-icon-custom-github" tooltip="bottom-right"  tooltipPosition = "bottom-right" />
 
@@ -167,5 +182,3 @@ class IconButtonsPage extends React.Component {
   }
 
 }
-
-module.exports = IconButtonsPage;
