@@ -1,12 +1,13 @@
-let React = require('react');
-let StylePropable = require('./mixins/style-propable');
-let Transitions = require('./styles/transitions');
-let EnhancedSwitch = require('./enhanced-switch');
-let RadioButtonOff = require('./svg-icons/toggle/radio-button-unchecked');
-let RadioButtonOn = require('./svg-icons/toggle/radio-button-checked');
+const React = require('react');
+const StylePropable = require('./mixins/style-propable');
+const Transitions = require('./styles/transitions');
+const EnhancedSwitch = require('./enhanced-switch');
+const RadioButtonOff = require('./svg-icons/toggle/radio-button-unchecked');
+const RadioButtonOn = require('./svg-icons/toggle/radio-button-checked');
+const DefaultRawTheme = require('./styles/raw-themes/light-raw-theme');
+const ThemeManager = require('./styles/theme-manager');
 
-
-let RadioButton = React.createClass({
+const RadioButton = React.createClass({
 
   mixins: [StylePropable],
 
@@ -14,14 +15,42 @@ let RadioButton = React.createClass({
     muiTheme: React.PropTypes.object,
   },
 
+  //for passing default theme context to children
+  childContextTypes: {
+    muiTheme: React.PropTypes.object,
+  },
+
+  getChildContext () {
+    return {
+      muiTheme: this.state.muiTheme,
+    };
+  },
+
+  getInitialState () {
+    return {
+      muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme),
+    };
+  },
+
+  //to update theme inside state whenever a new theme is passed down
+  //from the parent / owner using context
+  componentWillReceiveProps (nextProps, nextContext) {
+    let newMuiTheme = nextContext.muiTheme ? nextContext.muiTheme : this.state.muiTheme;
+    this.setState({muiTheme: newMuiTheme});
+  },
+
   propTypes: {
     iconStyle: React.PropTypes.object,
     labelStyle: React.PropTypes.object,
     onCheck: React.PropTypes.func,
+    checked: React.PropTypes.bool,
+    labelPosition: React.PropTypes.oneOf(['left', 'right']),
+    disabled: React.PropTypes.bool,
+    value: React.PropTypes.bool,
   },
 
   getTheme() {
-    return this.context.muiTheme.component.radioButton;
+    return this.state.muiTheme.radioButton;
   },
 
   getStyles() {
@@ -75,13 +104,13 @@ let RadioButton = React.createClass({
 
     let styles = this.getStyles();
     let onStyles =
-      this.mergeAndPrefix(
+      this.mergeStyles(
         styles.target,
         this.props.checked && styles.targetWhenChecked,
         this.props.iconStyle,
         this.props.disabled && styles.targetWhenDisabled);
     let offStyles =
-      this.mergeAndPrefix(
+      this.mergeStyles(
         styles.fill,
         this.props.checked && styles.fillWhenChecked,
         this.props.iconStyle,
@@ -96,12 +125,12 @@ let RadioButton = React.createClass({
 
     let rippleColor = this.props.checked ? this.getTheme().checkedColor : this.getTheme().borderColor;
 
-    let iconStyle = this.mergeAndPrefix(
+    let iconStyle = this.mergeStyles(
       styles.icon,
       this.props.iconStyle
     );
 
-    let labelStyle = this.mergeAndPrefix(
+    let labelStyle = this.mergeStyles(
       styles.label,
       this.props.labelStyle
     );

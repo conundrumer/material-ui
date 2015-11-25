@@ -1,95 +1,116 @@
-let React = require('react');
-let Router = require('react-router');
-let Route = Router.Route;
-let Redirect = Router.Redirect;
-let DefaultRoute = Router.DefaultRoute;
+import React from 'react';
+import {
+  Route,
+  Redirect,
+  IndexRoute,
+} from 'react-router';
 
 // Here we define all our material-ui ReactComponents.
-let Master = require('./components/master');
-let Home = require('./components/pages/home');
-let GetStarted = require('./components/pages/get-started');
+import Master from './components/master';
+import Home from './components/pages/home';
 
-let Customization = require('./components/pages/customization');
-let Colors = require('./components/pages/customization/colors');
-let Themes = require('./components/pages/customization/themes');
-let InlineStyles = require('./components/pages/customization/inline-styles');
+import GetStarted from './components/pages/get-started';
+import Prerequisites from './components/pages/get-started/prerequisites';
+import Installation from './components/pages/get-started/installation';
+import Examples from './components/pages/get-started/examples';
 
-let Components = require('./components/pages/components');
-let AppBar = require('./components/pages/components/app-bar');
-let Avatars = require('./components/pages/components/avatars');
-let Buttons = require('./components/pages/components/buttons');
-let Cards = require('./components/pages/components/cards');
-let DatePicker = require('./components/pages/components/date-picker');
-let Dialog = require('./components/pages/components/dialog');
-let DropDownMenu = require('./components/pages/components/drop-down-menu');
-let Icons = require('./components/pages/components/icons');
-let IconButtons = require('./components/pages/components/icon-buttons');
-let IconMenus = require('./components/pages/components/icon-menus');
-let LeftNav = require('./components/pages/components/left-nav');
-let Lists = require('./components/pages/components/lists');
-let Menus = require('./components/pages/components/menus');
-let Paper = require('./components/pages/components/paper');
-let Progress = require('./components/pages/components/progress');
-let RefreshIndicator = require('./components/pages/components/refresh-indicator');
-let Sliders = require('./components/pages/components/sliders');
-let Snackbar = require('./components/pages/components/snackbar');
-let Switches = require('./components/pages/components/switches');
-let Table = require('./components/pages/components/table');
-let Tabs = require('./components/pages/components/tabs');
-let TextFields = require('./components/pages/components/text-fields');
-let TimePicker = require('./components/pages/components/time-picker');
-let Toolbars = require('./components/pages/components/toolbars');
+import Customization from './components/pages/customization';
+import Colors from './components/pages/customization/colors';
+import Themes from './components/pages/customization/themes';
+import InlineStyles from './components/pages/customization/inline-styles';
+
+import Components from './components/pages/components';
+import AppBar from './components/pages/components/app-bar';
+import AutoComplete from './components/pages/components/auto-complete';
+import Avatars from './components/pages/components/avatars';
+import Badge from './components/pages/components/badge';
+import Buttons from './components/pages/components/buttons';
+import Cards from './components/pages/components/cards';
+import DatePicker from './components/pages/components/date-picker';
+import Dialog from './components/pages/components/dialog';
+import DropDownMenu from './components/pages/components/drop-down-menu';
+import GridList from './components/pages/components/grid-list';
+import Icons from './components/pages/components/icons';
+import IconButtons from './components/pages/components/icon-buttons';
+import IconMenus from './components/pages/components/icon-menus';
+import LeftNav from './components/pages/components/left-nav';
+import Lists from './components/pages/components/lists';
+import Menus from './components/pages/components/menus';
+import Paper from './components/pages/components/paper';
+import Popover from './components/pages/components/popover';
+import Progress from './components/pages/components/progress';
+import RefreshIndicator from './components/pages/components/refresh-indicator';
+import SelectFields from './components/pages/components/select-fields';
+import Sliders from './components/pages/components/sliders';
+import Snackbar from './components/pages/components/snackbar';
+import Switches from './components/pages/components/switches';
+import Table from './components/pages/components/table';
+import Tabs from './components/pages/components/tabs';
+import TextFields from './components/pages/components/text-fields';
+import TimePicker from './components/pages/components/time-picker';
+import Toolbars from './components/pages/components/toolbars';
 
 
-/** Routes: https://github.com/rackt/react-router/blob/master/docs/api/components/Route.md
-  *
-  * Routes are used to declare your view hierarchy.
-  *
-  * Say you go to http://material-ui.com/#/components/paper
-  * The react router will search for a route named 'paper' and will recursively render its
-  * handler and its parent handler like so: Paper > Components > Master
-  */
-
-let AppRoutes = (
-  <Route name="root" path="/" handler={Master}>
-    <Route name="home" handler={Home} />
-    <Route name="get-started" handler={GetStarted} />
-    <Route name="customization" handler={Customization}>
-      <Route name="colors" handler={Colors} />
-      <Route name="themes" handler={Themes} />
-      <Route name="inline-styles" handler={InlineStyles} />
-      <Redirect from="/customization" to="themes" />
+/**
+ * Routes: https://github.com/rackt/react-router/blob/master/docs/api/components/Route.md
+ *
+ * Routes are used to declare your view hierarchy.
+ *
+ * Say you go to http://material-ui.com/#/components/paper
+ * The react router will search for a route named 'paper' and will recursively render its
+ * handler and its parent handler like so: Paper > Components > Master
+ */
+const AppRoutes = (
+  <Route path="/" component={Master}>
+    <Route path="home" component={Home} />
+    <Redirect from="get-started" to="/get-started/prerequisites" />
+    <Route path="get-started" component={GetStarted}>
+      <Route path="prerequisites" component={Prerequisites} />
+      <Route path="installation" component={Installation} />
+      <Route path="examples" component={Examples} />
     </Route>
 
-    <Route name="components" handler={Components}>
-      <Route name="appbar" handler={AppBar} />
-      <Route name="avatars" handler={Avatars} />
-      <Route name="buttons" handler={Buttons} />
-      <Route name="cards" handler={Cards} />
-      <Route name="date-picker" handler={DatePicker} />
-      <Route name="dialog" handler={Dialog} />
-      <Route name="dropdown-menu" handler={DropDownMenu} />
-      <Route name="icons" handler={Icons} />
-      <Route name="icon-buttons" handler={IconButtons} />
-      <Route name="icon-menus" handler={IconMenus} />
-      <Route name="left-nav" handler={LeftNav} />
-      <Route name="lists" handler={Lists} />
-      <Route name="menus" handler={Menus} />
-      <Route name="paper" handler={Paper} />
-      <Route name="progress" handler={Progress} />
-      <Route name="refresh-indicator" handler={RefreshIndicator} />
-      <Route name="sliders" handler={Sliders} />
-      <Route name="switches" handler={Switches} />
-      <Route name="snackbar" handler={Snackbar} />
-      <Route name="table" handler={Table} />
-      <Route name="tabs" handler={Tabs} />
-      <Route name="text-fields" handler={TextFields} />
-      <Route name="time-picker" handler={TimePicker} />
-      <Route name="toolbars" handler={Toolbars} />
-      <Redirect from="/components" to="appbar" />
+    <Redirect from="customization" to="/customization/themes" />
+    <Route path="customization" component={Customization}>
+      <Route path="colors" component={Colors} />
+      <Route path="themes" component={Themes} />
+      <Route path="inline-styles" component={InlineStyles} />
     </Route>
 
-    <DefaultRoute handler={Home}/>
+    <Redirect from="components" to="/components/appbar" />
+    <Route path="components" component={Components}>
+      <Route path="appbar" component={AppBar} />
+      <Route path="auto-complete" component={AutoComplete} />
+      <Route path="avatars" component={Avatars} />
+      <Route path="badge" component={Badge} />
+      <Route path="buttons" component={Buttons} />
+      <Route path="cards" component={Cards} />
+      <Route path="date-picker" component={DatePicker} />
+      <Route path="dialog" component={Dialog} />
+      <Route path="dropdown-menu" component={DropDownMenu} />
+      <Route path="grid-list" component={GridList} />
+      <Route path="icons" component={Icons} />
+      <Route path="icon-buttons" component={IconButtons} />
+      <Route path="icon-menus" component={IconMenus} />
+      <Route path="left-nav" component={LeftNav} />
+      <Route path="lists" component={Lists} />
+      <Route path="menus" component={Menus} />
+      <Route path="paper" component={Paper} />
+      <Route path="popover" component={Popover} />
+      <Route path="progress" component={Progress} />
+      <Route path="refresh-indicator" component={RefreshIndicator} />
+      <Route path="select-fields" component={SelectFields} />
+      <Route path="sliders" component={Sliders} />
+      <Route path="switches" component={Switches} />
+      <Route path="snackbar" component={Snackbar} />
+      <Route path="table" component={Table} />
+      <Route path="tabs" component={Tabs} />
+      <Route path="text-fields" component={TextFields} />
+      <Route path="time-picker" component={TimePicker} />
+      <Route path="toolbars" component={Toolbars} />
+    </Route>
+
+    <IndexRoute component={Home}/>
   </Route>
 );
 
